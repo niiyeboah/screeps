@@ -1,0 +1,10 @@
+{
+    "name": "screeps",
+    "version": "0.0.1",
+    "description": "screeps code",
+    "author": "Nii Yeboah",
+    "devDependencies": {
+        "grunt": "^1.0.2",
+        "grunt-screeps": "^1.4.0"
+    }
+}
