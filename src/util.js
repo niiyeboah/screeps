@@ -9,7 +9,7 @@ module.exports = {
         const numBuilders = _.sum(Game.creeps, creep => creep.memory.role == 'builder');
         const numRepairers = _.sum(Game.creeps, creep => creep.memory.role == 'repairer');
         const spawnCreep = role => {
-            spawn.spawnCreep(body, role + '-' + Game.time, {
+            spawn.spawnCreep(body, `${role}|${body.length}|${Game.time}`, {
                 memory: { role }
             });
         };
@@ -31,6 +31,18 @@ module.exports = {
         for (let name in Memory.creeps) {
             if (!Game.creeps[name]) {
                 delete Memory.creeps[name];
+            }
+        }
+    },
+    harvestSource: function(creep, source) {
+        var droppedEnergy = creep.room.find(FIND_DROPPED_RESOURCES);
+        if (droppedEnergy.length) {
+            if (creep.pickup(droppedEnergy[0]) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(droppedEnergy[0]);
+            }
+        } else {
+            if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(source);
             }
         }
     }

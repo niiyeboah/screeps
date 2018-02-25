@@ -1,23 +1,24 @@
 const roleUpgrader = require('./role.upgrader');
+const util = require('util');
 const roleBuilder = {
     run: function(creep, source) {
         if (creep.memory.building && creep.carry.energy == 0) {
             creep.memory.building = false;
-            creep.say('🔄 harvest');
         }
         if (!creep.memory.building && creep.carry.energy == creep.carryCapacity) {
             creep.memory.building = true;
-            creep.say('🚧 build');
         }
         if (creep.memory.building) {
-            var targets = creep.room.find(FIND_CONSTRUCTION_SITES);
+            var targets = creep.pos.findClosestByRange(FIND_MY_CONSTRUCTION_SITES);
             if (targets.length) {
                 if (creep.build(targets[0]) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(targets[0], { visualizePathStyle: { stroke: '#ffffff' } });
+                    creep.moveTo(targets[0]);
                 }
+            } else {
+                roleUpgrader.run(creep);
             }
         } else {
-            roleUpgrader.run(creep, source);
+            util.harvestSource(creep, source);
         }
     }
 };
