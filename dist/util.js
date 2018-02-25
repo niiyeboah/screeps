@@ -16,7 +16,7 @@ module.exports = {
         if (numHarvesters < minHarvesters) spawnCreep('harvester');
         else if (numUpgraders < minUpgraders) spawnCreep('upgrader');
         else if (numRepairers < minRepairers) spawnCreep('repairer');
-        else spawnCreep('builder');
+        else if (numBuilders < minBuilders) spawnCreep('builder');
     },
     info: function(spawn) {
         if (spawn.spawning) {
