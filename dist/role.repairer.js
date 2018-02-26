@@ -1,7 +1,7 @@
 const roleBuilder = require('./role.builder');
 const util = require('util');
 const roleRepairer = {
-    run: function(creep, source) {
+    run: function(creep) {
         if (creep.memory.repairing && creep.carry.energy == 0) {
             creep.memory.repairing = false;
         }
@@ -20,7 +20,7 @@ const roleRepairer = {
                 roleBuilder.run(creep);
             }
         } else {
-            util.harvestSource(creep, source);
+            util.harvestSource(creep);
         }
     }
 };

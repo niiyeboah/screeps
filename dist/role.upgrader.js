@@ -1,6 +1,6 @@
 const util = require('util');
 const roleUpgrader = {
-    run: function(creep, source) {
+    run: function(creep) {
         if (creep.memory.upgrading && creep.carry.energy == 0) {
             creep.memory.upgrading = false;
         }
@@ -12,7 +12,7 @@ const roleUpgrader = {
                 creep.moveTo(creep.room.controller);
             }
         } else {
-            util.harvestSource(creep, source);
+            util.harvestSource(creep);
         }
     }
 };

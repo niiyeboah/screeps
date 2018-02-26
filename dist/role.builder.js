@@ -1,7 +1,7 @@
 const roleUpgrader = require('./role.upgrader');
 const util = require('util');
 const roleBuilder = {
-    run: function(creep, source) {
+    run: function(creep) {
         if (creep.memory.building && creep.carry.energy == 0) {
             creep.memory.building = false;
         }
@@ -18,7 +18,7 @@ const roleBuilder = {
                 roleUpgrader.run(creep);
             }
         } else {
-            util.harvestSource(creep, source);
+            util.harvestSource(creep);
         }
     }
 };

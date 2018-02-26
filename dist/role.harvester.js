@@ -1,30 +1,33 @@
-const util = require('util');
-const roleHarvester = {
-    run: function(creep, source) {
-        if (creep.memory.transferring && creep.carry.energy == 0) {
-            creep.memory.transferring = false;
-        }
-        if (!creep.memory.transferring && creep.carry.energy == creep.carryCapacity) {
-            creep.memory.transferring = true;
-        }
-        if (creep.memory.transferring) {
-            var targets = creep.room.find(FIND_STRUCTURES, {
-                filter: s => {
-                    let structures = [STRUCTURE_SPAWN, STRUCTURE_EXTENSION, STRUCTURE_TOWER];
-                    return structures.indexOf(s.structureType) > -1 && s.energy < s.energyCapacity;
-                }
-            });
-            if (targets.length) {
-                if (creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(targets[0]);
+const Worker = require('./class.worker');
+
+class Harvester extends Worker {
+    constructor(creep) {
+        super(creep);
+    }
+    work() {
+        this.resetOnError(() => {
+            this.update();
+            if (this.working) {
+                const target = this.pos.findClosestByRange(FIND_STRUCTURES, {
+                    filter: s => {
+                        const types = [STRUCTURE_SPAWN, STRUCTURE_EXTENSION, STRUCTURE_TOWER];
+                        return types.indexOf(s.structureType) > -1 && s.energy < s.energyCapacity;
+                    }
+                });
+                if (target) {
+                    if (this.target !== target || this.path === null) {
+                        this.path = this.pos.findPathTo(this.target);
+                    }
+                    if (this.pos.getRangeTo(this.source) > 1) this.moveByPath(this.path);
+                    else this.transfer(this.target);
+                } else {
+                    this.upgrade();
                 }
             } else {
-                roleBuilder.run(creep, source);
+                this.harvest();
             }
-        } else {
-            util.harvestSource(creep, source);
-        }
+        });
     }
-};
+}
 
-module.exports = roleHarvester;
+module.exports = Harvester;
