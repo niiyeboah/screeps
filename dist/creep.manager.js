@@ -8,9 +8,6 @@ class CreepManager {
      * @param {StructureSpawn} spawn
      */
     constructor(spawn) {
-        /**
-         * @property {StructureSpawn} spawn
-         */
         this.spawn = spawn;
         /**
          * @property {Object} roles
@@ -27,13 +24,29 @@ class CreepManager {
     }
     run() {
         const creeps = Game.creeps;
-        const dropped = this.spawn.room.find(FIND_DROPPED_RESOURCES);
+        const room = this.spawn.room;
+        const dropped = room.find(FIND_DROPPED_RESOURCES);
+        const hostile = room.find(FIND_HOSTILE_CREEPS);
+        const constructionSite = room.find(FIND_CONSTRUCTION_SITES);
+        const repairSite = room.find(FIND_STRUCTURES, {
+            filter: s => s.hits < s.hitsMax / 2 && s.structureType != STRUCTURE_WALL
+        });
 
-        if (dropped.length) Memory.dropped = dropped[0].id;
-        else Memory.dropped = false;
+        if (dropped.length) Memory.droppedId = dropped[0].id;
+        else Memory.droppedId = false;
+
+        if (hostile.length) Memory.hostileId = hostile[0].id;
+        else Memory.hostileId = false;
+
+        if (constructionSite.length) Memory.constructionSiteId = constructionSite[0].id;
+        else Memory.constructionSiteId = false;
+
+        if (repairSite.length) Memory.repairSiteId = repairSite[0].id;
+        else Memory.repairSiteId = false;
 
         this.respawn();
 
+        // Extend creep with role class and then do work.
         for (let name in creeps) {
             let creep = creeps[name];
             if (!creep.spawning) {

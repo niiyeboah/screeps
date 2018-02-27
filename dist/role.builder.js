@@ -10,12 +10,10 @@ class Builder extends Worker {
         this.work = this.repairStructures;
     }
     repairStructures() {
-        this.resetOnError(() => {
+        this.logError(() => {
             this.update();
             if (this.memory.working) {
-                const target = this.pos.findClosestByRange(FIND_STRUCTURES, {
-                    filter: s => s.hits < s.hitsMax / 2 && s.structureType != STRUCTURE_WALL
-                });
+                const target = Game.getObjectById(Memory.repairSiteId);
                 if (target) this.perform('repair', target);
                 else this.buildStructures();
             } else {
@@ -24,10 +22,10 @@ class Builder extends Worker {
         });
     }
     buildStructures() {
-        this.resetOnError(() => {
+        this.logError(() => {
             this.update();
             if (this.memory.working) {
-                const target = this.pos.findClosestByRange(FIND_MY_CONSTRUCTION_SITES);
+                const target = Game.getObjectById(Memory.constructionSiteId);
                 if (target) this.perform('build', target);
                 else this.roomUpgrade();
             } else {

@@ -11,13 +11,10 @@ class Gaurd extends Worker {
         this.work = this.gaurd;
     }
     gaurd() {
-        const target = this.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
         const controller = this.room.controller;
-        if (target) {
-            this.perform('attack', target);
-        } else if (this.pos.getRangeTo(controller) > 1) {
-            this.tryMoveTo(controller);
-        }
+        const target = Game.getObjectById(Memory.hostileId);
+        if (target) this.perform('attack', target);
+        else if (this.pos.getRangeTo(controller) > 1) this.tryMoveTo(controller);
     }
     static get BODY() {
         /**

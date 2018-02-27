@@ -8,7 +8,7 @@ module.exports.loop = function() {
 
     util.clearMemory();
 
-    tower();
+    tower(spawn);
 
     creepManager.run();
 

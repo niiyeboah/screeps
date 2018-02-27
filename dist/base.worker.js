@@ -30,7 +30,7 @@ class Worker extends Creep {
         }
     }
     harvestEnergy() {
-        this.resetOnError(() => {
+        this.logError(() => {
             let memorySource = Game.getObjectById(this.memory.sourceId);
             if (!Memory.droppedId) {
                 if (!memorySource || memorySource.energy === 0) {
@@ -47,7 +47,7 @@ class Worker extends Creep {
         });
     }
     roomUpgrade() {
-        this.resetOnError(() => {
+        this.logError(() => {
             this.update();
             if (this.memory.working) {
                 this.perform('upgradeController', this.room.controller);
@@ -64,7 +64,8 @@ class Worker extends Creep {
     tryMoveTo(location) {
         const currentPos = this.pos;
         const move = this.moveByPath(this.memory.path) === OK;
-        if (move && this.pos.roomName !== currentPos.roomName) {
+        const spawn = Game.spawns[Object.keys(Game.spawns)[0]];
+        if (this.pos.roomName !== spawn.pos.roomName) {
             this.memory.path === false;
             this.moveTo(location);
         } else if (!move || (move && currentPos.getRangeTo(this.pos) === 0)) {
@@ -76,13 +77,10 @@ class Worker extends Creep {
      * Reset state and log error.
      * @param {function} fn
      */
-    resetOnError(fn) {
+    logError(fn) {
         try {
             fn();
         } catch (e) {
-            this.memory.sourceId = false;
-            this.memory.targetId = false;
-            this.memory.path = false;
             console.log(`${this.name} | ERROR: ${e.message}`);
         }
     }

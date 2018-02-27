@@ -10,15 +10,29 @@ class Harvester extends Worker {
         this.work = this.transferEnergy;
     }
     transferEnergy() {
-        this.resetOnError(() => {
+        this.logError(() => {
             this.update();
             if (this.memory.working) {
-                const target = this.pos.findClosestByRange(FIND_STRUCTURES, {
-                    filter: s => {
-                        const types = [STRUCTURE_SPAWN, STRUCTURE_EXTENSION];
-                        return types.indexOf(s.structureType) > -1 && s.energy < s.energyCapacity;
-                    }
-                });
+                let target = false;
+                const hostile = Game.getObjectById(Memory.hostileId);
+                if (hostile) {
+                    const towers = this.room.find(FIND_STRUCTURES, {
+                        filter: s => {
+                            s.structureType === STRUCTURE_TOWER && s.energy < s.energyCapacity;
+                        }
+                    });
+                    if (towers.length) target = towers[0];
+                }
+                if (!target) {
+                    target = this.pos.findClosestByRange(FIND_STRUCTURES, {
+                        filter: s => {
+                            const types = [STRUCTURE_SPAWN, STRUCTURE_EXTENSION];
+                            return (
+                                types.indexOf(s.structureType) > -1 && s.energy < s.energyCapacity
+                            );
+                        }
+                    });
+                }
                 if (target) this.perform('transfer', target);
                 else this.roomUpgrade();
             } else {
