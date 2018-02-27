@@ -1,30 +1,28 @@
-const Worker = require('./class.worker');
+const Worker = require('./base.worker');
 
+/**
+ * @description
+ * Harvester role which defaults to Upgrader.
+ */
 class Harvester extends Worker {
     constructor(creep) {
         super(creep);
+        this.work = this.transferEnergy;
     }
-    work() {
+    transferEnergy() {
         this.resetOnError(() => {
             this.update();
-            if (this.working) {
+            if (this.memory.working) {
                 const target = this.pos.findClosestByRange(FIND_STRUCTURES, {
                     filter: s => {
-                        const types = [STRUCTURE_SPAWN, STRUCTURE_EXTENSION, STRUCTURE_TOWER];
+                        const types = [STRUCTURE_SPAWN, STRUCTURE_EXTENSION];
                         return types.indexOf(s.structureType) > -1 && s.energy < s.energyCapacity;
                     }
                 });
-                if (target) {
-                    if (this.target !== target || this.path === null) {
-                        this.path = this.pos.findPathTo(this.target);
-                    }
-                    if (this.pos.getRangeTo(this.source) > 1) this.moveByPath(this.path);
-                    else this.transfer(this.target);
-                } else {
-                    this.upgrade();
-                }
+                if (target) this.perform('transfer', target);
+                else this.roomUpgrade();
             } else {
-                this.harvest();
+                this.harvestEnergy();
             }
         });
     }

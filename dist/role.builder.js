@@ -1,26 +1,40 @@
-const roleUpgrader = require('./role.upgrader');
-const util = require('util');
-const roleBuilder = {
-    run: function(creep) {
-        if (creep.memory.building && creep.carry.energy == 0) {
-            creep.memory.building = false;
-        }
-        if (!creep.memory.building && creep.carry.energy == creep.carryCapacity) {
-            creep.memory.building = true;
-        }
-        if (creep.memory.building) {
-            var target = creep.pos.findClosestByRange(FIND_MY_CONSTRUCTION_SITES);
-            if (target) {
-                if (creep.build(target) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(target);
-                }
-            } else {
-                roleUpgrader.run(creep);
-            }
-        } else {
-            util.harvestSource(creep);
-        }
-    }
-};
+const Worker = require('./base.worker');
 
-module.exports = roleBuilder;
+/**
+ * @description
+ * Builder/Repairer role which defaults to Upgrader.
+ */
+class Builder extends Worker {
+    constructor(creep) {
+        super(creep);
+        this.work = this.repairStructures;
+    }
+    repairStructures() {
+        this.resetOnError(() => {
+            this.update();
+            if (this.memory.working) {
+                const target = this.pos.findClosestByRange(FIND_STRUCTURES, {
+                    filter: s => s.hits < s.hitsMax / 2 && s.structureType != STRUCTURE_WALL
+                });
+                if (target) this.perform('repair', target);
+                else this.buildStructures();
+            } else {
+                this.harvestEnergy();
+            }
+        });
+    }
+    buildStructures() {
+        this.resetOnError(() => {
+            this.update();
+            if (this.memory.working) {
+                const target = this.pos.findClosestByRange(FIND_MY_CONSTRUCTION_SITES);
+                if (target) this.perform('build', target);
+                else this.roomUpgrade();
+            } else {
+                this.harvestEnergy();
+            }
+        });
+    }
+}
+
+module.exports = Builder;
