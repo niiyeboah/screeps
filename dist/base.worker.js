@@ -32,10 +32,14 @@ class Worker extends Creep {
     harvestEnergy() {
         this.resetOnError(() => {
             let memorySource = Game.getObjectById(this.memory.sourceId);
-            if (!memorySource || memorySource.energy === 0) {
-                memorySource = this.pos.findClosestByRange(FIND_SOURCES_ACTIVE);
-                this.memory.sourceId = memorySource.id;
-                this.memory.path = this.pos.findPathTo(memorySource);
+            if (!Memory.droppedId) {
+                if (!memorySource || memorySource.energy === 0) {
+                    memorySource = this.pos.findClosestByRange(FIND_SOURCES_ACTIVE);
+                    this.memory.sourceId = memorySource.id;
+                    this.memory.path = this.pos.findPathTo(memorySource);
+                }
+            } else {
+                memorySource = Game.getObjectById(Memory.droppedId);
             }
             if (this.harvest(memorySource) === ERR_NOT_IN_RANGE) {
                 this.tryMoveTo(memorySource);
@@ -59,8 +63,11 @@ class Worker extends Creep {
      */
     tryMoveTo(location) {
         const currentPos = this.pos;
-        const move = this.moveByPath(this.memory.path) !== OK;
-        if (move !== OK || currentPos.getRangeTo(this.pos) === 0) {
+        const move = this.moveByPath(this.memory.path) === OK;
+        if (move && this.pos.roomName !== currentPos.roomName) {
+            this.memory.path === false;
+            this.moveTo(location);
+        } else if (!move || (move && currentPos.getRangeTo(this.pos) === 0)) {
             this.memory.path = this.pos.findPathTo(location);
         }
     }

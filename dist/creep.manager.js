@@ -4,10 +4,16 @@ const Gaurd = require('./role.gaurd');
 const Builder = require('./role.builder');
 
 class CreepManager {
+    /**
+     * @param {StructureSpawn} spawn
+     */
     constructor(spawn) {
+        /**
+         * @property {StructureSpawn} spawn
+         */
         this.spawn = spawn;
         /**
-         * @property roles
+         * @property {Object} roles
          * @description
          * List of roles and minimum counts.
          * Order of roles dictates the hierarchy of importance and spawning.
@@ -16,12 +22,18 @@ class CreepManager {
             harvester: { min: 5, class: Harvester },
             upgrader: { min: 5, class: Upgrader },
             gaurd: { min: 3, class: Gaurd },
-            builder: { min: 5, class: Builder }
+            builder: { min: 2, class: Builder }
         };
     }
     run() {
         const creeps = Game.creeps;
+        const dropped = this.spawn.room.find(FIND_DROPPED_RESOURCES);
+
+        if (dropped.length) Memory.dropped = dropped[0].id;
+        else Memory.dropped = false;
+
         this.respawn();
+
         for (let name in creeps) {
             let creep = creeps[name];
             if (!creep.spawning) {
