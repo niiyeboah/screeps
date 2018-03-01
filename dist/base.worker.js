@@ -32,17 +32,20 @@ class Worker extends Creep {
     harvestEnergy() {
         this.logError(() => {
             let memorySource = Game.getObjectById(this.memory.sourceId);
-            if (!Memory.droppedId) {
+            if (Memory.droppedId) {
+                memorySource = Game.getObjectById(Memory.droppedId);
+                if (this.pickup(memorySource) === ERR_NOT_IN_RANGE) {
+                    this.tryMoveTo(memorySource);
+                }
+            } else {
                 if (!memorySource || memorySource.energy === 0) {
                     memorySource = this.pos.findClosestByRange(FIND_SOURCES_ACTIVE);
                     this.memory.sourceId = memorySource.id;
                     this.memory.path = this.pos.findPathTo(memorySource);
                 }
-            } else {
-                memorySource = Game.getObjectById(Memory.droppedId);
-            }
-            if (this.harvest(memorySource) === ERR_NOT_IN_RANGE) {
-                this.tryMoveTo(memorySource);
+                if (this.harvest(memorySource) === ERR_NOT_IN_RANGE) {
+                    this.tryMoveTo(memorySource);
+                }
             }
         });
     }
@@ -62,14 +65,26 @@ class Worker extends Creep {
      * @param {RoomPosition} location
      */
     tryMoveTo(location) {
-        const currentPos = this.pos;
-        const move = this.moveByPath(this.memory.path) === OK;
-        const spawn = Game.spawns[Object.keys(Game.spawns)[0]];
-        if (this.pos.roomName !== spawn.pos.roomName) {
-            this.memory.path === false;
-            this.moveTo(location);
-        } else if (!move || (move && currentPos.getRangeTo(this.pos) === 0)) {
+        const move = this.moveByPath(this.memory.path);
+        let prevPos = false;
+        let pathBlocked = false;
+
+        if (this.memory.x && this.memory.y) {
+            prevPos = this.room.getPositionAt(this.memory.x, this.memory.y);
+        }
+
+        if (prevPos && typeof this.memory.move !== 'undefined') {
+            pathBlocked = this.memory.move === OK && prevPos.getRangeTo(this.pos) === 0;
+        }
+
+        this.memory.move = move;
+        this.memory.x = this.pos.x;
+        this.memory.y = this.pos.y;
+
+        if (pathBlocked || move === ERR_NOT_FOUND || move === ERR_INVALID_ARGS) {
             this.memory.path = this.pos.findPathTo(location);
+        } else if (move === ERR_NO_BODYPART) {
+            this.suicide();
         }
     }
     /**
