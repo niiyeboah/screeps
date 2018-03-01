@@ -16,20 +16,19 @@ class Gaurd extends Worker {
         if (target) this.perform('attack', target);
         else if (this.pos.getRangeTo(controller) > 1) this.tryMoveTo(controller);
     }
-    static get BODY() {
-        /**
-         * TOUGH  | 7
-         * MOVE   | 5
-         * ATTACK | 6
-         */
-        return [
-            ...[TOUGH, TOUGH, TOUGH],
-            ...[TOUGH, TOUGH, TOUGH],
-            ...[TOUGH, MOVE, ATTACK],
-            ...[MOVE, ATTACK, MOVE],
-            ...[ATTACK, MOVE, ATTACK],
-            ...[ATTACK, MOVE, ATTACK]
-        ];
+    static BODY(spawn) {
+        const baseCost = 150;
+        const baseBody = [TOUGH, TOUGH, MOVE, ATTACK];
+        const energyCapacity = spawn.room.energyCapacityAvailable;
+
+        let energy = energyCapacity - baseCost;
+        let body = baseBody;
+        while (energy >= baseCost) {
+            body = body.concat(baseBody);
+            energy -= baseCost;
+        }
+
+        return body;
     }
 }
 

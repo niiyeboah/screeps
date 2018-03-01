@@ -29,7 +29,7 @@ class CreepManager {
         const hostile = room.find(FIND_HOSTILE_CREEPS);
         const constructionSite = room.find(FIND_CONSTRUCTION_SITES);
         const repairSite = room.find(FIND_STRUCTURES, {
-            filter: s => s.hits < s.hitsMax / 2 && s.structureType != STRUCTURE_WALL
+            filter: s => s.hits < s.hitsMax / 2
         });
 
         if (dropped.length) Memory.droppedId = dropped[0].id;
@@ -74,7 +74,7 @@ class CreepManager {
      * @param {String} role
      */
     spawnCreep(role) {
-        const body = this.roles[role].class.BODY;
+        const body = this.roles[role].class.BODY(this.spawn);
         this.spawn.spawnCreep(body, `${role} | ${body.length} | ${Game.time}`, {
             memory: { role }
         });

@@ -85,6 +85,9 @@ class Worker extends Creep {
             this.memory.path = this.pos.findPathTo(location);
         } else if (move === ERR_NO_BODYPART) {
             this.suicide();
+        } else if (location.room.name !== this.room.name) {
+            this.moveTo(location);
+            this.memory.path = false;
         }
     }
     /**
@@ -110,19 +113,26 @@ class Worker extends Creep {
     /**
      * @description
      * Shuffled body to allow creep to perfrom action when damaged.
+     * Scale up body according to energy capacity if at least one harvester is present.
+     * @param {StructureSpawn} spawn
      */
-    static get BODY() {
-        /**
-         * WORK  | 4
-         * MOVE  | 4
-         * CARRY | 4
-         */
-        return [
-            ...[WORK, CARRY, MOVE],
-            ...[WORK, CARRY, MOVE],
-            ...[WORK, CARRY, MOVE],
-            ...[WORK, CARRY, MOVE]
-        ];
+    static BODY(spawn) {
+        const baseCost = 200;
+        const baseBody = [WORK, CARRY, MOVE];
+        const numHarvesters = _.sum(Game.creeps, creep => creep.memory.role === 'harvester');
+        const energyCapacity = spawn.room.energyCapacityAvailable;
+
+        let energy = energyCapacity - baseCost;
+        let body = baseBody;
+
+        if (numHarvesters > 0) {
+            while (energy >= baseCost) {
+                body = body.concat(baseBody);
+                energy -= baseCost;
+            }
+        }
+
+        return body;
     }
 }
 
